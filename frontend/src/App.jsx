@@ -9,7 +9,7 @@ import {
 import { PublicReceipt } from './pages/PublicReceipt.jsx';
 import { 
   Home, PlusCircle, Search, Clock, Award, Users, MapPin, 
-  FileText, ShieldAlert, Settings, LogOut, CheckCircle, RefreshCw, Smartphone 
+  FileText, ShieldAlert, Settings, LogOut, CheckCircle, RefreshCw, Smartphone, XCircle
 } from 'lucide-react';
 
 const getStorageItem = (key) => {
