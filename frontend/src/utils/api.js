@@ -1,4 +1,6 @@
-const BASE_URL = `http://${window.location.hostname}:5000/api`;
+const BASE_URL = window.location.port === '5173'
+  ? `http://${window.location.hostname}:5000/api`
+  : '/api';
 
 const getStorageItem = (key) => {
   try {
@@ -184,7 +186,10 @@ export const api = {
   }),
   downloadBackup: async () => {
     const token = getStorageItem('mandal_vargani_token');
-    const response = await fetch(`http://${window.location.hostname}:5000/api/admin/backup/download`, {
+    const downloadUrl = window.location.port === '5173'
+      ? `http://${window.location.hostname}:5000/api/admin/backup/download`
+      : '/api/admin/backup/download';
+    const response = await fetch(downloadUrl, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
