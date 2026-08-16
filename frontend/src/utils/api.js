@@ -122,12 +122,7 @@ export const api = {
   getMyReceipts: (period) => request(`/receipts/my-receipts?period=${period}`),
 
   // Public Receipt Lookup
-  getPublicReceipt: (token) => fetch(`http://localhost:5000/api/receipts/public/${token}`)
-    .then(async (res) => {
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Failed to verify receipt.');
-      return data;
-    }),
+  getPublicReceipt: (token) => request(`/receipts/public/${token}`),
 
   // Settlements / Handovers
   submitHandover: (submittedAmount, explanation) => request('/settlements/handover', {
