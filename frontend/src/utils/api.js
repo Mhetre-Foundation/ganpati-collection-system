@@ -178,6 +178,10 @@ export const api = {
   getBackupStatus: () => request('/admin/backup/status'),
   runBackup: () => request('/admin/backup/run', { method: 'POST' }),
   resetSystem: () => request('/admin/reset-system', { method: 'POST' }),
+  updateAdminProfile: (data) => request('/admin/update-profile', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }),
   downloadBackup: async () => {
     const token = getStorageItem('mandal_vargani_token');
     const response = await fetch(`http://${window.location.hostname}:5000/api/admin/backup/download`, {

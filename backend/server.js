@@ -1088,6 +1088,42 @@ app.post('/api/settings/update', authenticate, authorize(['ADMIN']), (req, res) 
 });
 
 
+// Admin: Update own Profile credentials (Name, Mobile, Password)
+app.post('/api/admin/update-profile', authenticate, authorize(['ADMIN']), (req, res) => {
+  const { name, mobile, password } = req.body;
+  const adminId = req.user.id;
+
+  if (!name || !mobile) {
+    return res.status(400).json({ error: 'Name and Mobile number are required.' });
+  }
+
+  try {
+    // Check if mobile number is already taken by another user
+    const existing = db.prepare('SELECT id FROM users WHERE mobile = ? AND id != ?').get(mobile, adminId);
+    if (existing) {
+      return res.status(400).json({ error: 'Mobile number/Login ID is already in use by another account.' });
+    }
+
+    if (password && String(password).trim() !== '') {
+      const hashed = hashPassword(password);
+      db.prepare('UPDATE users SET name = ?, mobile = ?, password_hash = ? WHERE id = ?')
+        .run(name, mobile, hashed, adminId);
+    } else {
+      db.prepare('UPDATE users SET name = ?, mobile = ? WHERE id = ?')
+        .run(name, mobile, adminId);
+    }
+
+    // Audit log
+    logAudit(adminId, 'UPDATE_ADMIN_PROFILE', 'USER', adminId, null, { name, mobile });
+
+    res.json({ message: 'Admin profile updated successfully. Please log in again if you changed mobile/password.' });
+  } catch (error) {
+    console.error('Admin profile update error:', error);
+    res.status(500).json({ error: 'Failed to update admin profile.' });
+  }
+});
+
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 

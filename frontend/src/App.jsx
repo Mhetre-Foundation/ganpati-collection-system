@@ -313,7 +313,7 @@ export default function App() {
               {tab === 'settlements' && <AdminSettlements />}
               {tab === 'reports' && <AdminReports />}
               {tab === 'audit-logs' && <AdminAuditLogs />}
-              {tab === 'settings' && <AdminSettings />}
+              {tab === 'settings' && <AdminSettings user={user} onLogout={handleLogout} />}
             </>
           ) : (
             <>

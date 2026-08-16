@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api.js';
 import { 
-  Users, MapPin, Award, FileText, Settings, ShieldAlert, 
+  Users, User, MapPin, Award, FileText, Settings, ShieldAlert, 
   MessageSquare, PlusCircle, Trash, RefreshCw, CheckCircle, XCircle, Search, Download 
 } from 'lucide-react';
 
@@ -951,7 +951,11 @@ export function AdminAuditLogs() {
 // ==========================================
 // 7. SYSTEM SETTINGS
 // ==========================================
-export function AdminSettings() {
+export function AdminSettings({ user, onLogout }) {
+  const [profileName, setProfileName] = useState(user?.name || 'President Admin');
+  const [profileMobile, setProfileMobile] = useState(user?.mobile || '9999999999');
+  const [profilePassword, setProfilePassword] = useState('');
+  const [profileSaving, setProfileSaving] = useState(false);
   const [mandalName, setMandalName] = useState('');
   const [mandalAddress, setMandalAddress] = useState('');
   const [mandalContact, setMandalContact] = useState('');
@@ -966,6 +970,13 @@ export function AdminSettings() {
   const [backupStatus, setBackupStatus] = useState({ lastBackup: 'Never', status: 'NO_BACKUP_YET' });
   const [backingUp, setBackingUp] = useState(false);
   const [resetting, setResetting] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setProfileName(user.name || '');
+      setProfileMobile(user.mobile || '');
+    }
+  }, [user]);
 
   const fetchSettingsAndBackup = async () => {
     setLoading(true);
@@ -990,6 +1001,28 @@ export function AdminSettings() {
   useEffect(() => {
     fetchSettingsAndBackup();
   }, []);
+
+  const handleProfileSubmit = async (e) => {
+    e.preventDefault();
+    setProfileSaving(true);
+    try {
+      const res = await api.updateAdminProfile({
+        name: profileName,
+        mobile: profileMobile,
+        password: profilePassword
+      });
+      alert(res.message);
+      if (profileMobile !== user.mobile || (profilePassword && profilePassword.trim() !== '')) {
+        onLogout();
+      } else {
+        window.location.reload();
+      }
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setProfileSaving(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -1133,6 +1166,55 @@ export function AdminSettings() {
           </form>
         )}
       </div>
+
+      {!loading && (
+        <div className="card" style={{ marginTop: '24px', borderTop: '2px solid var(--accent)' }}>
+          <h3 className="card-title">
+            <User size={18} /> Admin Profile & Credentials
+          </h3>
+          <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '16px' }}>
+            Update your President Admin display name, login mobile number (Login ID), and numeric PIN/password.
+          </p>
+          <form onSubmit={handleProfileSubmit}>
+            <div className="form-group">
+              <label>Admin Display Name *</label>
+              <input 
+                type="text" 
+                className="form-control" 
+                value={profileName}
+                onChange={(e) => setProfileName(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Admin Mobile / Login ID *</label>
+              <input 
+                type="text" 
+                className="form-control" 
+                value={profileMobile}
+                onChange={(e) => setProfileMobile(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="form-group" style={{ marginBottom: '20px' }}>
+              <label>New Password / PIN (Leave blank to keep current)</label>
+              <input 
+                type="password" 
+                className="form-control" 
+                placeholder="Enter new PIN or password"
+                value={profilePassword}
+                onChange={(e) => setProfilePassword(e.target.value)}
+              />
+            </div>
+
+            <button type="submit" className="btn btn-primary" disabled={profileSaving}>
+              {profileSaving ? <RefreshCw className="spin" /> : 'Update Profile Credentials'}
+            </button>
+          </form>
+        </div>
+      )}
 
       {!loading && (
         <div className="card" style={{ marginTop: '24px', borderTop: '2px solid var(--accent)' }}>
